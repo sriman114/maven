@@ -1,0 +1,102 @@
+pipeline
+{
+    agent none
+    stages
+    {
+        stage('continuous download')
+        {
+            agent any
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        git 'https://github.com/intelliqittrainings/maven.git'
+                    }
+                    catch(Exception e1)
+                    {
+                        exit(1)
+                    }
+                }
+            }
+        }
+        stage('continuous build' )
+        {
+            agent any
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        sh 'mvn package'
+                    }
+                    catch(Exception e2)
+                    {
+                        exit(1)
+                    }
+                }
+            }
+            
+        }
+        stage('continuous deploy')
+        {
+            agent any
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        sh 'scp /var/lib/jenkins/workspace/Tryout/webapp/target/webapp.war ubuntu@172.31.23.26:/var/lib/tomcat9/webapps/0507.war'
+                    }
+                    catch(Exception e3)
+                    {
+                        exit(1)
+                    }
+                }
+            }
+        }
+        stage('continuous Testing')
+        {
+            agent {label 'slave1'}
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                        sh 'java -jar /workspace/workspace/Tryout/testing.jar'
+                    }
+                    catch(Exception e4)
+                    {
+                        exit(1)
+                    }
+                    
+    
+                }
+            }
+        }
+        stage ('Continuous Build')
+        {
+            agent any
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        sh 'scp /var/lib/jenkins/workspace/Tryout/webapp/target/webapp.war ubuntu@172.31.17.235:/var/lib/tomcat9/webapps/july.war'
+                    }
+                    catch(Exception e5)
+                    {
+                        exit(1)
+                    }
+                }
+            }
+        }
+        
+    }
+}
